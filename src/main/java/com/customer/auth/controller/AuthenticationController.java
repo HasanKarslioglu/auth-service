@@ -23,9 +23,8 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody User user) {
-        //String token = authenticationService.loginUser(user.getUsername(), user.getPassword());
-        //return token != null ? ResponseEntity.ok(token) : ResponseEntity.badRequest().body("Username Already Exist");
-        return ResponseEntity.ok("deneme");
+        String token = authenticationService.registerUser(user.getUsername(), user.getPassword());
+        return token != null ? ResponseEntity.ok(token) : ResponseEntity.badRequest().body("Username Already Exist");
     }
 
     @PostMapping("/login")

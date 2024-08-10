@@ -13,9 +13,6 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @Column()
-    private String token;
-
     // Constructors
     public User() {
     }
@@ -23,14 +20,6 @@ public class User {
     public User(String username, String password) {
         this.username = username;
         this.password = password;
-    }
-
-    public String getToken() {
-        return token;
-    }
-
-    public void setToken(String token) {
-        this.token = token;
     }
 
     // Getters and Setters

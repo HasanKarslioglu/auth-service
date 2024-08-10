@@ -33,9 +33,9 @@ public class AuthenticationController {
         return token != null ? ResponseEntity.ok(token) : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
     }
 
-    //@GetMapping("/verify")
-    //public ResponseEntity<String> verifyToken(@RequestParam String token) {
-    //    boolean isValid = authenticationService.verifyToken(token);
-    //    return isValid ? ResponseEntity.ok("Token is valid") : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
-    //}
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyToken(@RequestParam String token) {
+        boolean isValid = authenticationService.verifyToken(token);
+        return isValid ? ResponseEntity.ok("Token is valid") : ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid token");
+    }
 }

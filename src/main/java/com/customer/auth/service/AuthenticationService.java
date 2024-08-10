@@ -6,4 +6,5 @@ import com.customer.auth.model.User;
 public interface AuthenticationService {
     String registerUser(String username, String password);
     String loginUser(String username, String password);
+    boolean verifyToken(String token);
 }

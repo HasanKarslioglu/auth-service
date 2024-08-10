@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.customer.auth.model.Token;
 import com.customer.auth.model.User;
 import com.customer.auth.repository.UserRepository;
+import com.customer.auth.service.TokenService;
 
 import java.util.UUID;
 
@@ -15,8 +16,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Autowired
     private UserRepository userRepository;
 
-    //@Autowired
-    //private TokenService tokenService;
+    @Autowired
+    private TokenService tokenService;
 
     @Override
     @Transactional
@@ -35,8 +36,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         User user = userRepository.findByUsername(username);
         if (user != null && user.getPassword().equals(password)) {
             String token = generateToken();
-            user.setToken(token);
-            //tokenService.saveToken(token, username);
+            tokenService.saveToken(token, username);
             return token;
         }
         return null;
@@ -46,7 +46,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return UUID.randomUUID().toString();
     }
 
-    //public boolean verifyToken(String token){
-        //return tokenService.getUserByToken(token) != null;
-    //}
+    @Override
+    public boolean verifyToken(String token){
+        return tokenService.getUsernameByToken(token) != null;
+    }
 }

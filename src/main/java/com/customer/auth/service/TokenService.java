@@ -17,7 +17,19 @@ public class TokenService {
         redisTemplate.opsForValue().set(token, username, Duration.ofMinutes(30));
     }
 
+    public void saveRefreshToken(String refreshToken, String username){
+        redisTemplate.opsForValue().set(refreshToken, username, Duration.ofHours(8));
+    }
+
     public String getUsernameByToken(String token){
         return (String) redisTemplate.opsForValue().get(token);
+    }
+
+    public boolean isRefreshTokenValid(String refToken){
+        return  (String) redisTemplate.opsForValue().get(refToken) != null;
+    }
+
+    public void invalidateToken(String refToken){
+        redisTemplate.opsForValue().getAndDelete(refToken);
     }
 }

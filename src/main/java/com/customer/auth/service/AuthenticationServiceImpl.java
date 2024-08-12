@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.customer.auth.model.Token;
 import com.customer.auth.model.User;
 import com.customer.auth.repository.UserRepository;
-import com.customer.auth.service.TokenService;
 
+import java.security.MessageDigest;
 import java.util.UUID;
 
 @Service
@@ -21,23 +21,42 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     @Transactional
-    public String registerUser(String username, String password) {
+    public Token registerUser(String username, String password) {
         if (userRepository.findByUsername(username) != null) {
             return null; // User already exists
         }
-        User user = new User(username, password);
+        String hashedPassword = hashWithSHA256(password);
+        User user = new User(username, hashedPassword);
         userRepository.save(user);
         return loginUser(username, password);
     }
 
     @Override
     @Transactional
-    public String loginUser(String username, String password) {
+    public Token loginUser(String username, String password) {
         User user = userRepository.findByUsername(username);
-        if (user != null && user.getPassword().equals(password)) {
+        String hashedPassword = hashWithSHA256(password);
+        if (user != null && user.getPassword().equals(hashedPassword)) {
             String token = generateToken();
+            String refToken = generateToken();
             tokenService.saveToken(token, username);
-            return token;
+            tokenService.saveRefreshToken(refToken, username);
+            return new Token(token,refToken,username);
+        }
+        return null;
+    }
+
+    @Override
+    @Transactional
+    public Token refreshToken(Token oldToken){
+        boolean isValid = tokenService.isRefreshTokenValid(oldToken.getRefToken());
+        if (isValid){
+            Token newToken = new Token(generateToken(), generateToken(), oldToken.getUsername());
+            tokenService.saveToken(newToken.getToken(), newToken.getUsername());
+            tokenService.saveRefreshToken(newToken.getRefToken(), newToken.getUsername());
+            tokenService.invalidateToken(oldToken.getRefToken());
+            tokenService.invalidateToken(oldToken.getToken());
+            return newToken;
         }
         return null;
     }
@@ -49,5 +68,23 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     public boolean verifyToken(String token){
         return tokenService.getUsernameByToken(token) != null;
+    }
+
+    public static String hashWithSHA256(String input) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+
+            byte[] hash = digest.digest(input.getBytes("UTF-8"));
+
+            StringBuilder hexString = new StringBuilder();
+            for (byte b : hash) {
+                String hex = Integer.toHexString(0xff & b);
+                if (hex.length() == 1) hexString.append('0');
+                hexString.append(hex);
+            }
+            return hexString.toString();
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 }

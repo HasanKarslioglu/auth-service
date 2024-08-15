@@ -1,14 +1,44 @@
 version: '3.8'
-
 services:
+  mysql:
+    image: mysql:8.0.33
+    container_name: mysql
+    environment:
+      MYSQL_DATABASE: auth
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: 952587587
+      MYSQL_ROOT_PASSWORD: 952587587
+    volumes:
+      - ./datas/mysql_data:/var/lib/mysql
+    ports:
+      - "3307:3306"
+    networks:
+      - auth-net
   redis:
     image: redis:latest
     container_name: redis
     ports:
       - "6379:6379"
     volumes:
-      - ./redis_data:/data
-
+      - ./datas/redis_data:/data
+    networks:
+      - auth-net
+  spring-app:
+    build:
+      dockerfile: Dockerfile
+    container_name: spring-app
+    restart: always
+    ports:
+      - "8090:8080"
+    depends_on:
+      - mysql
+      - redis
+    networks:
+      - auth-net
 volumes:
   redis-data:
     driver: local
+  mysql_data:
+    driver: local
+networks:
+  auth-net:

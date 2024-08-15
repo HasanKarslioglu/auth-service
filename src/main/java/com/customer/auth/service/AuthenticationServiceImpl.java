@@ -49,8 +49,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Override
     @Transactional
     public Token refreshToken(Token oldToken){
-        boolean isValid = tokenService.isRefreshTokenValid(oldToken.getRefToken());
-        if (isValid){
+        boolean isTokenValid = tokenService.isRefreshTokenValid(oldToken.getRefToken());
+        boolean isUserValid = tokenService.getUsernameByToken(oldToken.getRefToken()).equals(oldToken.getUsername());
+        if (isTokenValid && isUserValid){
             Token newToken = new Token(generateToken(), generateToken(), oldToken.getUsername());
             tokenService.saveToken(newToken.getToken(), newToken.getUsername());
             tokenService.saveRefreshToken(newToken.getRefToken(), newToken.getUsername());

@@ -33,4 +33,5 @@ build/
 .vscode/
 
 secrets.properties
+datas/
 redis_data/
